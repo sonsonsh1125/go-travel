@@ -1,59 +1,27 @@
-import { YoutubeTranscript } from 'youtube-transcript';
+// Temporarily using description instead of transcript due to Vercel limitations
 import { VideoTranscript, YouTubeVideo } from '../types';
 
 export class TranscriptService {
   /**
-   * Get transcript for a YouTube video
+   * Get transcript (using description as fallback for Vercel) for a YouTube video
    */
   async getTranscript(video: YouTubeVideo): Promise<VideoTranscript | null> {
     try {
-      const transcriptItems = await YoutubeTranscript.fetchTranscript(video.videoId, {
-        lang: 'ko',
-      });
-
-      if (!transcriptItems || transcriptItems.length === 0) {
+      // Use video description as a fallback since youtube-transcript doesn't work in Vercel
+      if (!video.description || video.description.trim().length < 50) {
+        console.log(`  ⚠️  No sufficient description: ${video.title.substring(0, 50)}...`);
         return null;
       }
-
-      const fullTranscript = transcriptItems
-        .map((item) => item.text)
-        .join(' ')
-        .replace(/\s+/g, ' ')
-        .trim();
 
       return {
         videoId: video.videoId,
         videoTitle: video.title,
-        transcript: fullTranscript,
+        transcript: video.description,
         language: 'ko',
       };
     } catch (error: any) {
-      // Try English if Korean is not available
-      try {
-        const transcriptItems = await YoutubeTranscript.fetchTranscript(video.videoId, {
-          lang: 'en',
-        });
-
-        if (!transcriptItems || transcriptItems.length === 0) {
-          return null;
-        }
-
-        const fullTranscript = transcriptItems
-          .map((item) => item.text)
-          .join(' ')
-          .replace(/\s+/g, ' ')
-          .trim();
-
-        return {
-          videoId: video.videoId,
-          videoTitle: video.title,
-          transcript: fullTranscript,
-          language: 'en',
-        };
-      } catch (enError) {
-        console.log(`  ⚠️  No transcript available: ${video.title.substring(0, 50)}...`);
-        return null;
-      }
+      console.log(`  ⚠️  Error processing video: ${video.title.substring(0, 50)}...`);
+      return null;
     }
   }
 
