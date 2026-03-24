@@ -1,12 +1,12 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import OpenAI from 'openai';
 import { Place, VideoTranscript, YouTubeVideo, PlaceWithMentions } from '../types';
 
 export class PlaceExtractorService {
-  private genAI: GoogleGenerativeAI;
+  private openai: OpenAI;
   private model: string;
 
-  constructor(apiKey: string, model: string = 'gemini-1.5-flash') {
-    this.genAI = new GoogleGenerativeAI(apiKey);
+  constructor(apiKey: string, model: string = 'gpt-4o-mini') {
+    this.openai = new OpenAI({ apiKey });
     this.model = model;
   }
 
@@ -18,26 +18,32 @@ export class PlaceExtractorService {
     destination: string
   ): Promise<Place[]> {
     try {
-      const model = this.genAI.getGenerativeModel({ model: this.model });
       const prompt = this.buildPrompt(transcript.transcript, destination);
 
-      const systemInstruction = '당신은 여행 영상 자막에서 구체적인 장소를 추출하는 전문가입니다. 실제 방문 가능한 장소만 추출하고, JSON 형식으로 응답합니다.';
-      const fullPrompt = `${systemInstruction}\n\n${prompt}`;
+      const response = await this.openai.chat.completions.create({
+        model: this.model,
+        messages: [
+          {
+            role: 'system',
+            content:
+              '당신은 여행 영상 자막에서 구체적인 장소를 추출하는 전문가입니다. 실제 방문 가능한 장소만 추출하고, JSON 형식으로 응답합니다.',
+          },
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+        temperature: 0.3,
+        response_format: { type: 'json_object' },
+      });
 
-      const result = await model.generateContent(fullPrompt);
-      const response = await result.response;
-      const text = response.text();
-
-      // Extract JSON from response (handle markdown code blocks)
-      let jsonText = text.trim();
-      if (jsonText.startsWith('```json')) {
-        jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
-      } else if (jsonText.startsWith('```')) {
-        jsonText = jsonText.replace(/```\n?/g, '');
+      const content = response.choices[0].message.content;
+      if (!content) {
+        return [];
       }
 
-      const parsedResult = JSON.parse(jsonText);
-      const places: Place[] = parsedResult.places || [];
+      const result = JSON.parse(content);
+      const places: Place[] = result.places || [];
 
       // Add video ID to each place
       return places.map((place) => ({

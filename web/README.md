@@ -22,7 +22,7 @@ cp .env.local.example .env.local
 ```env
 YOUTUBE_API_KEY=your_youtube_api_key_here
 GEMINI_API_KEY=your_gemini_api_key_here
-AI_MODEL=gemini-1.5-flash
+AI_MODEL=gemini-pro
 ```
 
 ### 3. 개발 서버 실행
@@ -117,7 +117,7 @@ vercel --prod
 |------|------|------|
 | `YOUTUBE_API_KEY` | YouTube Data API v3 키 | ✅ |
 | `GEMINI_API_KEY` | Google Gemini API 키 (무료) | ✅ |
-| `AI_MODEL` | 사용할 AI 모델 | ❌ (기본값: gemini-1.5-flash) |
+| `AI_MODEL` | 사용할 AI 모델 | ❌ (기본값: gemini-pro) |
 
 ## 🔒 보안
 
