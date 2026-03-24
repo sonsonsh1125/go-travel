@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { YouTubeService } from '@/lib/services/youtube';
 import { TranscriptService } from '@/lib/services/transcript';
 import { PlaceExtractorService } from '@/lib/services/placeExtractor';
+import { CacheService } from '@/lib/services/cache';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60; // 60 seconds (requires Pro plan, 10s for Hobby)
@@ -16,6 +17,21 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    // Check cache first
+    const cache = new CacheService();
+    const cachedResult = cache.get(destination);
+
+    if (cachedResult) {
+      console.log(`✅ Returning cached results for "${destination}"`);
+      return NextResponse.json({
+        success: true,
+        data: cachedResult,
+        cached: true,
+      });
+    }
+
+    console.log(`🔍 No cache found, fetching new results for "${destination}"`);
 
     const youtubeApiKey = process.env.YOUTUBE_API_KEY;
     const openaiApiKey = process.env.OPENAI_API_KEY;
@@ -72,14 +88,20 @@ export async function POST(request: Request) {
       destination
     );
 
+    const resultData = {
+      destination,
+      videos,
+      transcripts,
+      places,
+    };
+
+    // Save to cache
+    cache.set(destination, resultData);
+
     return NextResponse.json({
       success: true,
-      data: {
-        destination,
-        videos,
-        transcripts,
-        places,
-      },
+      data: resultData,
+      cached: false,
     });
   } catch (error: any) {
     console.error('Error in search API:', error);
