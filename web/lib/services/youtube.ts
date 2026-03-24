@@ -17,7 +17,7 @@ export class YouTubeService {
       const searchQueries = [
         `${config.destination} 여행`,
         `${config.destination} 브이로그`,
-        `${config.destination} 관광`,
+        `${config.destination} 혼여행`,
       ];
 
       const allVideos: YouTubeVideo[] = [];
