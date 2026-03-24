@@ -7,10 +7,9 @@ interface ResultsProps {
     transcripts: any[];
     places: any[];
   };
-  onSaveToNotion: () => void;
 }
 
-export default function Results({ results, onSaveToNotion }: ResultsProps) {
+export default function Results({ results }: ResultsProps) {
   const { destination, videos, transcripts, places } = results;
 
   return (
@@ -21,7 +20,7 @@ export default function Results({ results, onSaveToNotion }: ResultsProps) {
           📊 "{destination}" 검색 결과
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl">
             <div className="text-sm text-purple-600 font-semibold mb-1">검색한 영상</div>
             <div className="text-4xl font-bold text-purple-700">{videos.length}</div>
@@ -35,13 +34,6 @@ export default function Results({ results, onSaveToNotion }: ResultsProps) {
             <div className="text-4xl font-bold text-pink-700">{places.length}</div>
           </div>
         </div>
-
-        <button
-          onClick={onSaveToNotion}
-          className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-4 px-6 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-[1.02] text-lg"
-        >
-          📌 Notion에 저장하기
-        </button>
       </div>
 
       {/* Top Places */}

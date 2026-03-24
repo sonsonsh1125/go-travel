@@ -3,13 +3,11 @@
 import { useState } from 'react';
 import SearchForm from '@/components/SearchForm';
 import Results from '@/components/Results';
-import NotionSaveModal from '@/components/NotionSaveModal';
 
 export default function Home() {
   const [searchResults, setSearchResults] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState({ step: '', percent: 0 });
-  const [showNotionModal, setShowNotionModal] = useState(false);
 
   const handleSearch = async (destination: string) => {
     setLoading(true);
@@ -46,10 +44,6 @@ export default function Home() {
     }
   };
 
-  const handleSaveToNotion = () => {
-    setShowNotionModal(true);
-  };
-
   return (
     <main className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="text-center mb-12">
@@ -60,7 +54,7 @@ export default function Home() {
           AI 기반 여행지 장소 추출기
         </p>
         <p className="text-white/75 mt-2">
-          YouTube 영상에서 자동으로 장소 정보를 추출하여 Notion에 정리합니다
+          YouTube 영상에서 자동으로 장소 정보를 추출합니다
         </p>
       </div>
 
@@ -73,15 +67,6 @@ export default function Home() {
       {searchResults && (
         <Results
           results={searchResults}
-          onSaveToNotion={handleSaveToNotion}
-        />
-      )}
-
-      {showNotionModal && searchResults && (
-        <NotionSaveModal
-          places={searchResults.places}
-          destination={searchResults.destination}
-          onClose={() => setShowNotionModal(false)}
         />
       )}
     </main>
