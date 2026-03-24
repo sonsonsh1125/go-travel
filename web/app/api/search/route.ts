@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     const youtubeService = new YouTubeService(youtubeApiKey);
     const videos = await youtubeService.searchDestinationVideos({
       destination,
-      maxResults: 30,
+      maxResults: 20,
     });
 
     if (videos.length === 0) {

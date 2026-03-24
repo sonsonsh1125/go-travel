@@ -12,6 +12,12 @@ interface ResultsProps {
 export default function Results({ results }: ResultsProps) {
   const { destination, videos, transcripts, places } = results;
 
+  // Generate Google Maps search URL
+  const getGoogleMapsUrl = (placeName: string, destination: string) => {
+    const query = encodeURIComponent(`${placeName} ${destination}`);
+    return `https://www.google.com/maps/search/?api=1&query=${query}`;
+  };
+
   return (
     <div className="space-y-6">
       {/* Summary */}
@@ -65,6 +71,15 @@ export default function Results({ results }: ResultsProps) {
                       <span className="px-3 py-1 bg-purple-600 text-white text-sm font-semibold rounded-full">
                         {place.category}
                       </span>
+                      <a
+                        href={getGoogleMapsUrl(place.name, destination)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-full transition-colors"
+                        title="구글 지도에서 보기"
+                      >
+                        📍 지도
+                      </a>
                     </div>
                     <p className="text-gray-600 mb-2">{place.description}</p>
                     <div className="flex items-center gap-4 text-sm">

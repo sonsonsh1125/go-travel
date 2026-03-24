@@ -17,7 +17,7 @@ export class YouTubeService {
       const searchQueries = [
         `${config.destination} 여행`,
         `${config.destination} 브이로그`,
-        `${config.destination} 맛집`,
+        `${config.destination} 관광`,
       ];
 
       const allVideos: YouTubeVideo[] = [];
@@ -32,8 +32,15 @@ export class YouTubeService {
       const uniqueVideos = this.removeDuplicates(allVideos);
       uniqueVideos.sort((a, b) => b.viewCount - a.viewCount);
 
-      console.log(`Found ${uniqueVideos.length} unique videos for "${config.destination}"`);
-      return uniqueVideos.slice(0, config.maxResults);
+      // Filter to only include videos with destination in title
+      const filteredVideos = uniqueVideos.filter((video) =>
+        video.title.toLowerCase().includes(config.destination.toLowerCase())
+      );
+
+      console.log(
+        `Found ${uniqueVideos.length} unique videos, ${filteredVideos.length} with "${config.destination}" in title`
+      );
+      return filteredVideos.slice(0, config.maxResults);
     } catch (error) {
       console.error('Error searching destination videos:', error);
       throw error;
