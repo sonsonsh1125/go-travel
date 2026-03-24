@@ -21,8 +21,8 @@ cp .env.local.example .env.local
 `.env.local` 파일:
 ```env
 YOUTUBE_API_KEY=your_youtube_api_key_here
-OPENAI_API_KEY=your_openai_api_key_here
-AI_MODEL=gpt-4o-mini
+GEMINI_API_KEY=your_gemini_api_key_here
+AI_MODEL=gemini-1.5-flash
 ```
 
 ### 3. 개발 서버 실행
@@ -96,8 +96,8 @@ vercel --prod
 ### 백엔드 (API Routes)
 - ✅ YouTube Data API v3 통합
 - ✅ youtube-transcript로 자막 수집
-- ✅ OpenAI GPT-4o-mini로 장소 추출
-- ✅ Notion API로 데이터 저장
+- ✅ Google Gemini AI로 장소 추출 (무료)
+- ✅ 결과 표시 (Notion 연동 제거)
 
 ### 사용자 경험
 - ✅ 사용자별 Notion 계정 연동 가능
@@ -116,8 +116,8 @@ vercel --prod
 | 변수 | 설명 | 필수 |
 |------|------|------|
 | `YOUTUBE_API_KEY` | YouTube Data API v3 키 | ✅ |
-| `OPENAI_API_KEY` | OpenAI API 키 | ✅ |
-| `AI_MODEL` | 사용할 AI 모델 | ❌ (기본값: gpt-4o-mini) |
+| `GEMINI_API_KEY` | Google Gemini API 키 (무료) | ✅ |
+| `AI_MODEL` | 사용할 AI 모델 | ❌ (기본값: gemini-1.5-flash) |
 
 ## 🔒 보안
 
@@ -129,7 +129,7 @@ vercel --prod
 
 - **Vercel**: 무료 플랜 사용 가능
 - **YouTube API**: 무료 (일일 10,000 units)
-- **OpenAI API**: 영상 30개 기준 약 $0.05-0.10
+- **Google Gemini API**: 무료 (월 1500 requests)
 
 ## 🐛 문제 해결
 
@@ -149,5 +149,4 @@ npm run build
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Vercel Deployment](https://vercel.com/docs)
 - [YouTube Data API](https://developers.google.com/youtube/v3)
-- [OpenAI API](https://platform.openai.com/docs)
-- [Notion API](https://developers.notion.com/)
+- [Google Gemini API](https://ai.google.dev/docs)

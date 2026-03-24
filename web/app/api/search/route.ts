@@ -18,9 +18,9 @@ export async function POST(request: Request) {
     }
 
     const youtubeApiKey = process.env.YOUTUBE_API_KEY;
-    const openaiApiKey = process.env.OPENAI_API_KEY;
+    const geminiApiKey = process.env.GEMINI_API_KEY;
 
-    if (!youtubeApiKey || !openaiApiKey) {
+    if (!youtubeApiKey || !geminiApiKey) {
       return NextResponse.json(
         { error: 'Server configuration error: Missing API keys' },
         { status: 500 }
@@ -62,8 +62,8 @@ export async function POST(request: Request) {
 
     // Step 3: Extract places using AI
     const placeExtractor = new PlaceExtractorService(
-      openaiApiKey,
-      process.env.AI_MODEL || 'gpt-4o-mini'
+      geminiApiKey,
+      process.env.AI_MODEL || 'gemini-1.5-flash'
     );
 
     const places = await placeExtractor.extractPlacesFromMultipleTranscripts(
