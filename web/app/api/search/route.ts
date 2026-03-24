@@ -4,7 +4,7 @@ import { TranscriptService } from '@/lib/services/transcript';
 import { PlaceExtractorService } from '@/lib/services/placeExtractor';
 
 export const runtime = 'nodejs';
-export const maxDuration = 300; // 5 minutes
+export const maxDuration = 60; // 60 seconds (requires Pro plan, 10s for Hobby)
 
 export async function POST(request: Request) {
   try {
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     const youtubeService = new YouTubeService(youtubeApiKey);
     const videos = await youtubeService.searchDestinationVideos({
       destination,
-      maxResults: 20,
+      maxResults: 10, // Reduced for faster response on Vercel free tier
     });
 
     if (videos.length === 0) {

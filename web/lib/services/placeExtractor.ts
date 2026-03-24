@@ -80,8 +80,8 @@ export class PlaceExtractorService {
 
       process.stdout.write(` ✅ (${places.length} places)\n`);
 
-      // Small delay to avoid rate limiting
-      await this.delay(1000);
+      // Small delay to avoid rate limiting (reduced for Vercel)
+      await this.delay(300);
     }
 
     console.log(`\n📍 Total places extracted: ${allPlaces.length}`);
