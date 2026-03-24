@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go-Travel - AI 여행지 장소 추출기</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group small {
+            display: block;
+            margin-top: 5px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .progress {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .results {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .result-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-item h3 {
+            color: #333;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .result-item .category {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .result-item p {
+            color: #666;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .result-item .mentions {
+            color: #764ba2;
+            font-weight: 600;
+        }
+
+        .error {
+            background: #fee;
+            border-left: 4px solid #f44;
+            padding: 15px;
+            border-radius: 8px;
+            color: #c33;
+            display: none;
+            margin-top: 20px;
+        }
+
+        .warning {
+            background: #fffbeb;
+            border: 2px solid #fbbf24;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .warning h3 {
+            color: #92400e;
+            margin-bottom: 10px;
+        }
+
+        .warning p {
+            color: #78350f;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .warning ul {
+            margin-left: 20px;
+            color: #78350f;
+        }
+
+        .warning li {
+            margin-bottom: 5px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #e0e0e0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌍 Go-Travel</h1>
+            <p>AI 기반 여행지 장소 추출기</p>
+        </div>
+
+        <div class="card">
+            <div class="warning">
+                <h3>⚠️ 데모 버전 제약사항</h3>
+                <p>이 HTML 데모는 브라우저의 보안 제약으로 인해 <strong>제한된 기능</strong>만 제공합니다:</p>
+                <ul>
+                    <li>✅ YouTube 영상 검색 가능 (API 키 필요)</li>
+                    <li>❌ 자막 수집 불가 (youtube-transcript는 Node.js 전용)</li>
+                    <li>❌ OpenAI API 호출 불가 (CORS 제한)</li>
+                    <li>❌ Notion 저장 불가</li>
+                </ul>
+                <p><strong>실제 사용을 원하시면</strong>: <code>npm run dev</code>로 CLI 버전 사용을 권장합니다.</p>
+            </div>
+
+            <div class="input-group">
+                <label for="youtube-key">YouTube API Key</label>
+                <input type="password" id="youtube-key" placeholder="AIzaSy...">
+                <small>Google Cloud Console에서 발급받은 YouTube Data API v3 키</small>
+            </div>
+
+            <div class="input-group">
+                <label for="destination">여행지</label>
+                <input type="text" id="destination" placeholder="예: 교토, 오사카, 파리">
+                <small>검색할 여행지를 입력하세요</small>
+            </div>
+
+            <button class="btn" id="search-btn" onclick="startSearch()">
+                🔍 검색 시작
+            </button>
+
+            <div class="progress" id="progress">
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" id="progress-fill"></div>
+                </div>
+                <div class="progress-text" id="progress-text">
+                    <span class="spinner"></span> 검색 중...
+                </div>
+            </div>
+
+            <div class="error" id="error"></div>
+        </div>
+
+        <div class="results" id="results"></div>
+    </div>
+
+    <script>
+        let searchInProgress = false;
+
+        async function startSearch() {
+            if (searchInProgress) return;
+
+            const youtubeKey = document.getElementById('youtube-key').value.trim();
+            const destination = document.getElementById('destination').value.trim();
+            const errorDiv = document.getElementById('error');
+            const resultsDiv = document.getElementById('results');
+            const progressDiv = document.getElementById('progress');
+            const searchBtn = document.getElementById('search-btn');
+
+            // Reset
+            errorDiv.style.display = 'none';
+            resultsDiv.style.display = 'none';
+            resultsDiv.innerHTML = '';
+
+            // Validation
+            if (!youtubeKey) {
+                showError('YouTube API Key를 입력해주세요.');
+                return;
+            }
+
+            if (!destination) {
+                showError('여행지를 입력해주세요.');
+                return;
+            }
+
+            searchInProgress = true;
+            searchBtn.disabled = true;
+            progressDiv.style.display = 'block';
+
+            try {
+                // Step 1: Search YouTube videos
+                updateProgress(30, `"${destination}" 관련 YouTube 영상 검색 중...`);
+                const videos = await searchYouTubeVideos(youtubeKey, destination);
+
+                if (videos.length === 0) {
+                    showError('검색 결과가 없습니다.');
+                    return;
+                }
+
+                updateProgress(60, `${videos.length}개 영상 발견! 데모 결과 생성 중...`);
+
+                // Step 2: Simulate place extraction (real version needs backend)
+                await sleep(1500);
+                updateProgress(90, '장소 추출 중...');
+
+                const mockPlaces = generateMockPlaces(destination, videos);
+
+                updateProgress(100, '완료!');
+                await sleep(500);
+
+                // Display results
+                displayResults(mockPlaces, destination);
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError(error.message || '오류가 발생했습니다. API 키를 확인해주세요.');
+            } finally {
+                searchInProgress = false;
+                searchBtn.disabled = false;
+                progressDiv.style.display = 'none';
+            }
+        }
+
+        async function searchYouTubeVideos(apiKey, destination) {
+            const queries = [
+                `${destination} 여행`,
+                `${destination} 브이로그`,
+                `${destination} 맛집`
+            ];
+
+            const allVideos = [];
+
+            for (const query of queries) {
+                const url = `https://www.googleapis.com/youtube/v3/search?` +
+                    `key=${apiKey}&q=${encodeURIComponent(query)}&part=snippet&type=video&maxResults=10&order=viewCount`;
+
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('YouTube API 호출 실패. API 키를 확인해주세요.');
+                }
+
+                const data = await response.json();
+                allVideos.push(...data.items);
+            }
+
+            return allVideos;
+        }
+
+        function generateMockPlaces(destination, videos) {
+            // Mock data for demo purposes
+            const categories = ['관광지', '맛집', '카페', '호텔', '사찰', '시장'];
+            const mockPlaces = [
+                { name: `${destination} 중심가`, category: '관광지', description: '여행자들이 가장 많이 찾는 중심 지역', mentions: 15 },
+                { name: `${destination} 전통시장`, category: '시장', description: '현지 음식과 문화를 체험할 수 있는 시장', mentions: 12 },
+                { name: `${destination} 유명 라멘집`, category: '맛집', description: '현지인과 관광객 모두에게 인기 있는 라멘집', mentions: 10 },
+                { name: `${destination} 역사 박물관`, category: '관광지', description: '지역 역사를 배울 수 있는 박물관', mentions: 8 },
+                { name: `${destination} 스페셜티 카페`, category: '카페', description: '분위기 좋은 로컬 카페', mentions: 7 },
+            ];
+
+            return mockPlaces;
+        }
+
+        function displayResults(places, destination) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `
+                <div class="card">
+                    <h2 style="margin-bottom: 20px; color: #333;">📍 "${destination}" 추출 결과 (데모)</h2>
+                    <p style="color: #666; margin-bottom: 20px;">
+                        ⚠️ 이것은 <strong>시뮬레이션된 데모 데이터</strong>입니니다.
+                        실제 AI 기반 장소 추출은 백엔드 서버가 필요합니다.
+                    </p>
+                    ${places.map(place => `
+                        <div class="result-item">
+                            <h3>
+                                ${place.name}
+                                <span class="category">${place.category}</span>
+                            </h3>
+                            <p>${place.description}</p>
+                            <p class="mentions">🔥 ${place.mentions}개 영상에서 언급됨</p>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="card" style="background: #f0f9ff; border: 2px solid #3b82f6;">
+                    <h3 style="color: #1e40af; margin-bottom: 15px;">💡 실제 버전 사용하기</h3>
+                    <p style="color: #1e3a8a; margin-bottom: 10px;">
+                        완전한 기능을 사용하려면 다음 명령어로 CLI 버전을 실행하세요:
+                    </p>
+                    <pre style="background: #1e293b; color: #e2e8f0; padding: 15px; border-radius: 8px; overflow-x: auto;">npm run dev</pre>
+                    <p style="color: #1e3a8a; margin-top: 15px; font-size: 14px;">
+                        또는 Next.js 풀스택 앱으로 개발하면 웹에서 완전히 작동합니다!
+                    </p>
+                </div>
+            `;
+            resultsDiv.style.display = 'block';
+        }
+
+        function updateProgress(percent, text) {
+            document.getElementById('progress-fill').style.width = percent + '%';
+            document.getElementById('progress-text').innerHTML =
+                `<span class="spinner"></span> ${text}`;
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = '❌ ' + message;
+            errorDiv.style.display = 'block';
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
+</html>
