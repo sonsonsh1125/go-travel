@@ -36,14 +36,19 @@ export default function Results({ results }: ResultsProps) {
         </div>
       </div>
 
-      {/* Top Places */}
+      {/* All Places */}
       {places.length > 0 && (
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          <h3 className="text-2xl font-bold text-gray-800 mb-4">
-            🏆 가장 많이 언급된 장소 Top 10
-          </h3>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-2xl font-bold text-gray-800">
+              📍 추출된 모든 장소 ({places.length}개)
+            </h3>
+            <div className="text-sm text-gray-500">
+              언급 횟수 기준 정렬
+            </div>
+          </div>
           <div className="space-y-4">
-            {places.slice(0, 10).map((place, index) => (
+            {places.map((place, index) => (
               <div
                 key={index}
                 className="border-l-4 border-purple-600 bg-gray-50 p-4 rounded-r-lg hover:bg-gray-100 transition-colors"
@@ -62,8 +67,16 @@ export default function Results({ results }: ResultsProps) {
                       </span>
                     </div>
                     <p className="text-gray-600 mb-2">{place.description}</p>
-                    <div className="text-sm text-purple-600 font-semibold">
-                      🔥 {place.mentionCount}개 영상에서 언급됨
+                    <div className="flex items-center gap-4 text-sm">
+                      <div className="text-purple-600 font-semibold">
+                        🔥 {place.mentionCount}개 영상에서 언급
+                      </div>
+                      {place.videoTitles && place.videoTitles.length > 0 && (
+                        <div className="text-gray-500">
+                          📹 {place.videoTitles.slice(0, 2).join(', ')}
+                          {place.videoTitles.length > 2 && ` 외 ${place.videoTitles.length - 2}개`}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
